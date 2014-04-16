@@ -660,9 +660,17 @@ inline NSString* customVariable(NSString* name, NSString* value) {
   
 }
 
+static dispatch_once_t pred;
+static NSOperationQueue* requestQueue = nil;
 
 - (void)sendEvent {
 
+    dispatch_once(&pred, ^{
+        requestQueue = [[NSOperationQueue alloc] init];
+        requestQueue.maxConcurrentOperationCount = 1;
+        requestQueue.name = @"com.codified.varagesale.piwikrequest.queue";
+    });
+    
   NSUInteger numberOfEventsToSend = self.authenticationToken && self.eventsPerRequest > 0 ? self.eventsPerRequest : 1;
   
   [self eventsFromStore:numberOfEventsToSend completionBlock:^(NSArray *entityIDs, NSArray *events, BOOL hasMore) {
@@ -708,7 +716,7 @@ inline NSString* customVariable(NSString* name, NSString* value) {
 //        DLog(@"Language %@", [locale objectForKey:NSLocaleLanguageCode]);
 //        DLog(@"Country %@", [locale objectForKey:NSLocaleCountryCode]);
         
-          [NSURLConnection sendAsynchronousRequest:request queue:nil completionHandler:^(NSURLResponse *response, NSData *data, NSError *connectionError) {
+          [NSURLConnection sendAsynchronousRequest:request queue:requestQueue completionHandler:^(NSURLResponse *response, NSData *data, NSError *connectionError) {
               
               if ( !connectionError )
               {
