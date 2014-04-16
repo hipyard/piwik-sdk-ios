@@ -72,9 +72,9 @@ static NSString * const PiwikDefaultRecordValue = @"1";
 static NSString * const PiwikDefaultAPIVersionValue = @"1";
 
 // Custom variables
-static NSUInteger const PiwikCustomVariablesMaxNumber = 5;
-static NSUInteger const PiwikCustomVariablesMaxNameLength = 20;
-static NSUInteger const PiwikCustomVariablesMaxValueLengt = 100;
+//static NSUInteger const PiwikCustomVariablesMaxNumber = 5;
+//static NSUInteger const PiwikCustomVariablesMaxNameLength = 20;
+//static NSUInteger const PiwikCustomVariablesMaxValueLengt = 100;
 
 // Default values
 static NSUInteger const PiwikDefaultSessionTimeout = 120;
@@ -708,29 +708,28 @@ inline NSString* customVariable(NSString* name, NSString* value) {
 //        DLog(@"Language %@", [locale objectForKey:NSLocaleLanguageCode]);
 //        DLog(@"Country %@", [locale objectForKey:NSLocaleCountryCode]);
         
-        AFHTTPRequestOperation *operation = [self HTTPRequestOperationWithRequest:request success:^(AFHTTPRequestOperation *operation, id responseObject) {
-          
-          DLog(@"Successfully sent stats to Piwik server");
-          
-          [self deleteEventsWithIDs:entityIDs];
-          
-          [self sendEventDidFinishHasMorePending:hasMore];
-          
-        } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
+          [NSURLConnection sendAsynchronousRequest:request queue:nil completionHandler:^(NSURLResponse *response, NSData *data, NSError *connectionError) {
+              
+              if ( !connectionError )
+              {
+                  DLog(@"Successfully sent stats to Piwik server");
+                  
+                  [self deleteEventsWithIDs:entityIDs];
+                  
+                  [self sendEventDidFinishHasMorePending:hasMore];
+              }
+              else
+              {
+                  ALog(@"Failed to send stats to Piwik server with reason : %@", connectionError);
+                  
+                  if ([self shouldAbortdispatchForNetworkError:connectionError]) {
+                      [self sendEventDidFinishHasMorePending:NO];
+                  } else {
+                      [self sendEventDidFinishHasMorePending:hasMore];
+                  }
+              }
+          }];
 
-          ALog(@"Failed to send stats to Piwik server with reason : %@", error);
-          
-          if ([self shouldAbortdispatchForNetworkError:error]) {
-            [self sendEventDidFinishHasMorePending:NO];
-          } else {
-            [self sendEventDidFinishHasMorePending:hasMore];
-          }
-          
-          
-        }];
-        
-        [self enqueueHTTPRequestOperation:operation];
-        
       }
       
     }
