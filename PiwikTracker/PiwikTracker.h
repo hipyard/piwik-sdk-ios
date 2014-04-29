@@ -186,6 +186,19 @@
 - (BOOL)sendViews:(NSString*)screen, ...;
 
 /**
+ Track a single hierarchical screen view.
+ 
+ Piwik support hierarchical screen names, e.g. screen/settings/register. Use this to create a hierarchical and logical grouping of screen views in the Piwik web interface.
+ 
+ Screen views are prefixed with "screen" by default unless prefixing scheme is turned off.
+ 
+ @param screens An array of names of the screen to track.
+ @return YES if the event was queued for dispatching.
+ @see isPrefixingEnabled
+ */
+- (BOOL)sendViewsInArray:(NSArray*)screens;
+
+/**
  Track an event (as oppose to a screen view).
  
  Events are tracked as hierarchical screen names, category/action/label.

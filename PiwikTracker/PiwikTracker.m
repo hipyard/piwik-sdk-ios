@@ -365,6 +365,18 @@ static PiwikTracker *_sharedInstance;
   return [self send:components];
  }
 
+- (BOOL)sendViewsInArray:(NSArray *)screens
+{
+    NSMutableArray *components = [NSMutableArray array];
+    if (self.isPrefixingEnabled) {
+        // Add prefix
+        [components addObject:PiwikPrefixView];
+    }
+    
+    [components addObjectsFromArray:screens];
+    
+    return [self send:components];
+}
 
 - (BOOL)sendEventWithCategory:(NSString*)category action:(NSString*)action label:(NSString*)label {
 
