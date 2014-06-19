@@ -9,62 +9,70 @@
 #import <Foundation/Foundation.h>
 
 
+@class PiwikTransactionBuilder;
+
+
+typedef void (^TransactionBuilderBlock)(PiwikTransactionBuilder *builder);
+
+
 /**
  A transaction is a composite object containing transaction information as well as an optional list of items included in the transaction.
  */
 @interface PiwikTransaction : NSObject
 
 /**
- A unique transaction identifier.
+ A unique transaction identifier. Mandatory.
  */
-@property (readonly) NSString *identifier;
+@property (nonatomic, readonly) NSString *identifier;
 
 /**
- The sub total of the transaction (excluding shipping cost).
+ The grand total for the ecommerce order. Mandatory.
  */
-@property (readonly) NSUInteger total;
+@property (nonatomic, readonly) NSNumber *grandTotal;
 
 /**
- The total tax.
+ The sub total of the transaction (excluding shipping cost). Optional.
  */
-@property (readonly) NSUInteger tax;
+@property (nonatomic, readonly) NSNumber *subTotal;
 
 /**
- The total shipping cost
+ The total tax. Optional.
  */
-@property (readonly) NSUInteger shipping;
+@property (nonatomic, readonly) NSNumber *tax;
 
 /**
- The total offered discount.
+ The total shipping cost. Optional.
  */
-@property (readonly) NSUInteger discount;
+@property (nonatomic, readonly) NSNumber *shippingCost;
 
 /**
- A list of items included in the transaction.
- @PiwikTransactionItem
+ The total offered discount. Optional.
  */
-@property (readonly) NSArray *items;
-
+@property (nonatomic, readonly) NSNumber *discount;
 
 /**
- Create a single transaction.
- 
- User the Piwik transaction builder to create transactions and included items.
- 
- @param identifier A unique identifier
- @param total The sub total of the order (excluding shipping cost)
- @param tax The total tax
- @param shipping The total shipping cost
- @para discount The total offered discount
- @see PiwikTransactionBuilder
+ A list of items included in the transaction. Optional.
  @see PiwikTransactionItem
  */
-+ (instancetype)transactionWithIdentifier:(NSString*)identifier
-                                    total:(NSUInteger)total
-                                      tax:(NSUInteger)tax
-                                 shipping:(NSUInteger)shipping
-                                 discount:(NSUInteger)discount
-                                    items:(NSArray*)items;
+@property (nonatomic, readonly) NSArray *items;
+
+
+/**
+ Create a transaction using a transaction builder.
+ @param block a transaction builder block
+ @return a new transaction
+ @see PiwikTransactionBuilder
+ */
++ (instancetype)transactionWithBuilder:(TransactionBuilderBlock)block;
+
+
+/**
+ Create a transaction from the builder.
+ Use the builder method to create a new instance.
+ @return a new transaction
+ @see transactionWithBuilder:
+ */
+- (id)initWithBuilder:(PiwikTransactionBuilder*)builder;
 
 
 @end

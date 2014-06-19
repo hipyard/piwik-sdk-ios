@@ -11,90 +11,61 @@
 #import "PiwikTransactionItem.h"
 
 
-@interface PiwikTransactionBuilder ()
-
-@property (readonly) NSString *identifier;
-@property (readonly) NSUInteger total;
-@property (readonly) NSUInteger tax;
-@property (readonly) NSUInteger shipping;
-@property (readonly) NSUInteger discount;
-@property (readonly) NSMutableArray *items;
-
-
-@end
-
-
-
 @implementation PiwikTransactionBuilder
 
 
-+ (instancetype)builderWithTransactionIdentifier:(NSString*)identifier total:(NSUInteger)total {
-  
-  return [self builderWithTransactionIdentifier:identifier total:total tax:0 shipping:0 discount:0];
-  
-}
-
-
-+ (instancetype)builderWithTransactionIdentifier:(NSString*)identifier
-                                           total:(NSUInteger)total
-                                             tax:(NSUInteger)tax
-                                        shipping:(NSUInteger)shipping
-                                        discount:(NSUInteger)discount {
-  
-  return [[PiwikTransactionBuilder alloc] initWithTransactionIdentifier:identifier total:total tax:tax shipping:shipping discount:discount];
-  
-}
-
-
-- (id)initWithTransactionIdentifier:(NSString*)identifier
-                              total:(NSUInteger)total
-                                tax:(NSUInteger)tax
-                           shipping:(NSUInteger)shipping
-                           discount:(NSUInteger)discount {
+- (instancetype)init {
   self = [super init];
   if (self) {
-    _identifier = identifier;
-    _total = total;
-    _tax = tax;
-    _shipping = shipping;
-    _discount = discount;
-    _items = [NSMutableArray array];
+    _items = [[NSMutableArray alloc] init];
   }
   return self;
-  
 }
 
 
-- (PiwikTransactionBuilder*)addItemWithName:(NSString*)name price:(NSUInteger)price quantity:(NSUInteger)quantity {
-  
-  return [self addItemWithName:name sku:nil category:nil price:0 quantity:0];
-  
+- (void)addItemWithSku:(NSString*)sku {
+  PiwikTransactionItem *item = [PiwikTransactionItem itemWithSKU:sku];
+  [self addTransactionItem:item];
 }
 
 
-- (PiwikTransactionBuilder*)addItemWithName:(NSString*)name
-                                        sku:(NSString*)sku
-                                   category:(NSString*)category
-                                      price:(NSUInteger)price
-                                   quantity:(NSUInteger)quantity {
+- (void)addItemWithSku:(NSString*)sku
+                  name:(NSString*)name
+              category:(NSString*)category
+                 price:(float)price
+              quantity:(NSUInteger)quantity {
   
-  PiwikTransactionItem *item = [PiwikTransactionItem itemWithName:name sku:sku category:category price:price quantity:quantity];
-  [_items addObject:item];
-  
-  return self;
-  
+  PiwikTransactionItem *item = [PiwikTransactionItem itemWithSku:sku name:name category:category price:price quantity:quantity];
+  [self addTransactionItem:item];
+}
+
+
+- (void)addTransactionItem:(PiwikTransactionItem*)item {
+  [self.items addObject:item];
 }
 
 
 - (PiwikTransaction*)build {
   
-  return [PiwikTransaction transactionWithIdentifier:self.identifier
-                                               total:self.total
-                                                 tax:self.tax
-                                            shipping:self.shipping
-                                            discount:self.discount
-                                               items:self.items];
+  // Verify that mandatory parameters have been set
+  __block BOOL isTransactionValid = self.identifier.length > 0 && self.grandTotal;
+  
+  [self.items enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
+    PiwikTransactionItem *item = (PiwikTransactionItem*)obj;
+    if (!item.isValid) {
+      isTransactionValid = NO;
+      *stop = YES;
+    }
+  }];
+  
+  if (isTransactionValid) {
+    return [[PiwikTransaction alloc] initWithBuilder:self];
+  } else {
+    NSLog(@"Failed to build transaction, missing mandatory parameters");
+    return nil;
+  }
   
 }
+
 
 @end

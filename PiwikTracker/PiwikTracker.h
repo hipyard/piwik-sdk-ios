@@ -77,7 +77,7 @@
 /**
  Unique client id, used to identify unique visitors.
  
- This id is generated the first time the app is installed. The value will be retained across app restart and upgrades. If the application is uninstalled and installed again, a new value will be generated. 
+ This id is generated the first time the app is installed. The value will be retained across app restart and upgrades. If the application is uninstalled and installed again, a new client id will be generated. 
  
  Requires the authentication token to be set.
  */
@@ -124,6 +124,8 @@
 
 /**
  Events sent to the Piwik server will include the users current position when the event was generated. This can be used to improve showing visitors location. Default NO. This value must be set before the tracker is used the first time.
+ 
+ Please note that the position will only be used when showing the location in a users profile. It will not affect the visitor map.
  
  The user will be asked for permission to use current location when the first event is sent. The user can also disable the location service from the Settings location.
  
@@ -186,32 +188,27 @@
 - (BOOL)sendViews:(NSString*)screen, ...;
 
 /**
- Track a single hierarchical screen view.
- 
- Piwik support hierarchical screen names, e.g. screen/settings/register. Use this to create a hierarchical and logical grouping of screen views in the Piwik web interface.
- 
- Screen views are prefixed with "screen" by default unless prefixing scheme is turned off.
- 
- @param screens An array of names of the screen to track.
- @return YES if the event was queued for dispatching.
- @see isPrefixingEnabled
+ Legacy event tracking.
+ @warning This method is deprecated.
+ @see sendEventWithCategory:action:name:value:
  */
-- (BOOL)sendViewsInArray:(NSArray*)screens;
+- (BOOL)sendEventWithCategory:(NSString*)category action:(NSString*)action label:(NSString*)label __deprecated_msg("Use sendEventWithCategory:action:name:value: instead.");
+
 
 /**
- Track an event (as oppose to a screen view).
+ Track an event (as oppose a screen view).
  
- Events are tracked as hierarchical screen names, category/action/label.
+ @warning As of Piwik server 2.3 events are presented in a separate section and support sending a numeric value (float or integer). The Piwik tracker support this out of the box. If your app is connecting to an older Piwik server (<2.3) you can enable the legacy event encoding by defining the macro `PIWIK_LEGACY_EVENT_ENCODING` in your .pch file (`#define PIWIK_LEGACY_EVENT_ENCODING`).
  
- Events are prefixed with "event" by default unless prefixing scheme is turned off.
- 
+ The legacy event encoding will track events as hierarchical screen names, category/action/label. Events are prefixed with "event" by default unless prefixing scheme is turned off.
+
  @param category The category of the event
- @param action The action name
- @param label The label name, optional
+ @param action The name of the action, e.g Play, Pause, Download
+ @param name Event name, e.g. song name, file name. Optional.
+ @param value A numeric value, float or integer. Optional.
  @return YES if the event was queued for dispatching.
- @see isPrefixingEnabled
  */
-- (BOOL)sendEventWithCategory:(NSString*)category action:(NSString*)action label:(NSString*)label;
+- (BOOL)sendEventWithCategory:(NSString*)category action:(NSString*)action name:(NSString*)name value:(NSNumber*)value;
 
 /**
  Track a caught exception or error.
@@ -245,7 +242,7 @@
  @param revenue The monetary value of the conversion.
  @return YES if the event was queued for dispatching.
  */
-- (BOOL)sendGoalWithID:(NSString*)goalID revenue:(NSUInteger)revenue;
+- (BOOL)sendGoalWithID:(NSUInteger)goalID revenue:(NSUInteger)revenue;
 
 /**
  Track a search performed in the application. The search could be local or towards a server.
@@ -263,17 +260,36 @@
 /**
  Track an ecommerce transaction.
  
- A transaction is a composite object containing transaction information as well as an optional list of items included in the transaction.
+ A transaction contains transaction information as well as an optional list of items included in the transaction.
  
  Use the transaction builder to create the transaction object.
  
- @param transaction The transaction
+ @param transaction The transaction.
  @return YES if the event was queued for dispatching.
  @see PiwikTransactionBuilder
  @see PiwikTransaction
  @see PiwikTransactionItem
  */
 - (BOOL)sendTransaction:(PiwikTransaction*)transaction;
+
+
+/**
+ Track that the app was launched from a Piwik campaign URL.
+ The campaign information will be sent to the server with the next Piwik event.
+ 
+ A Piwik campaign URL contains one or two special parameter for tracking campaigns.
+ * pk_campaign - The name of the campaign
+ * pk_keyword - A specific call to action within a campaign
+ Example URL http://example.org/landing.html?pk_campaign=Email-Nov2011&pk_kwd=LearnMore
+ 
+ Use the [Piwik URL builder tool](http://piwik.org/docs/tracking-campaigns-url-builder/) to safely generate Piwik campaign URLs.
+ 
+ If no Piwik campaign parameters are detected in the URL will be ignored and no tracking performed.
+ 
+ @param campaignURLString A custom app URL containing campaign parameters.
+ @return YES if URL was detected to contain Piwik campaign parameter.
+ */
+- (BOOL)sendCampaign:(NSString*)campaignURLString;
 
 
 /**

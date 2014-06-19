@@ -35,9 +35,13 @@ static NSString * const PiwikProductionAuthenticationToken = @"1a3e854ebf1cc7f59
   [PiwikTracker sharedInstanceWithBaseURL:[NSURL URLWithString:PiwikProductionServerURL] siteID:PiwikProductionSiteID authenticationToken:PiwikProductionAuthenticationToken];
 #endif
   
-  // Configure the tracker
-//  [PiwikTracker sharedInstance].debug = YES; // Uncomment to print event to the console instead of sending it to the Piwik server
-//  [PiwikTracker sharedInstance].dispatchInterval = 0;
+  /* Configure the tracker */
+  
+//  [PiwikTracker sharedInstance].debug = YES;
+  [PiwikTracker sharedInstance].dispatchInterval = 30;
+//  [PiwikTracker sharedInstance].sampleRate = 50;
+//  [PiwikTracker sharedInstance].eventsPerRequest = 2;
+  [PiwikTracker sharedInstance].includeLocationInformation = YES;
   
   // Do not track anything until the user give consent
   if (![[NSUserDefaults standardUserDefaults] boolForKey:PiwikAskedForPermissonKey]) {
@@ -45,6 +49,12 @@ static NSString * const PiwikProductionAuthenticationToken = @"1a3e854ebf1cc7f59
   }
   
   return YES;
+}
+
+- (BOOL)application:(UIApplication *)application openURL:(NSURL *)url sourceApplication:(NSString *)sourceApplication annotation:(id)annotation {
+  
+  // Look for any Piwik campaign keywords
+  return [[PiwikTracker sharedInstance] sendCampaign:[url absoluteString]];  
 }
 
 

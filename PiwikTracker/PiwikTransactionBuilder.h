@@ -7,7 +7,9 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "PiwikTransaction.h"
+
+
+@class PiwikTransaction;
 
 
 /**
@@ -18,70 +20,69 @@
 
 
 /**
- Create an ecommerce transaction builder.
- 
- Items included in the transaction must be added separately one by one.
- 
- @param identifier A unique identifier
- @param total The sub total of the order (excluding shipping cost)
- @param tax The total tax
- @param shipping The total shipping cost
- @param discount The offered discount
- @return A transaction builder instance
- @see addItemWithName:sku:category:price:quantity:
+ A unique transaction identifier.
  */
-+ (instancetype)builderWithTransactionIdentifier:(NSString*)identifier
-                                           total:(NSUInteger)total
-                                             tax:(NSUInteger)tax
-                                        shipping:(NSUInteger)shipping
-                                        discount:(NSUInteger)discount;
+@property (nonatomic, strong) NSString *identifier;
 
 /**
- Create an ecommerce transaction builder.
- 
- This is a convenience method for creating a builder with only the transaction identity and total.
- 
- @param identifier A unique identifier
- @param total The sub total of the order (excluding shipping cost)
- @return A transaction builder instance
- @see builderWithTransactionIdentifier:total
+ The grand total for the ecommerce order
  */
-+ (instancetype)builderWithTransactionIdentifier:(NSString*)identifier total:(NSUInteger)total;
+@property (nonatomic, strong) NSNumber *grandTotal;
+
+/**
+ The sub total of the transaction (excluding shipping cost).
+ */
+@property (nonatomic, strong) NSNumber *subTotal;
+
+/**
+ The total tax.
+ */
+@property (nonatomic, strong) NSNumber *tax;
+
+/**
+ The total shipping cost
+ */
+@property (nonatomic, strong) NSNumber *shippingCost;
+
+/**
+ The total offered discount.
+ */
+@property (nonatomic, strong) NSNumber *discount;
+
+/**
+ A list of items included in the transaction.
+ @see PiwikTransactionItem
+ */
+@property (nonatomic, strong) NSMutableArray *items;
 
 
 /**
- Add an item to the transaction builder.
- 
- @param name The name of the item
+ Add a transaction item.
+
  @param sku The unique SKU of the item
+ @param name The name of the item
  @param category The category of the added item
  @param price The price
  @param quantity The quantity of the product in the transaction
- @return A transaction builder instance
  */
-- (PiwikTransactionBuilder*)addItemWithName:(NSString*)name
-                                        sku:(NSString*)sku
-                                   category:(NSString*)category
-                                      price:(NSUInteger)price
-                                   quantity:(NSUInteger)quantity;
+- (void)addItemWithSku:(NSString*)sku
+                  name:(NSString*)name
+              category:(NSString*)category
+                 price:(float)price
+              quantity:(NSUInteger)quantity;
 
 /**
- Add an item to the transaction builder.
+ Add a transaction item to the transaction.
  
- This is a convenience method for adding an item with only a name, price and quantity.
- 
- @param name The name of the item
- @param price The price
- @param quantity The quantity of the product in the transaction
- @return A transaction builder instance
+ @param sku The unique SKU of the item
+ @see addItemWithName:sku:category:price:quantity:
  */
-- (PiwikTransactionBuilder*)addItemWithName:(NSString*)name price:(NSUInteger)price quantity:(NSUInteger)quantity;
-
+- (void)addItemWithSku:(NSString*)sku;
 
 
 /**
- Create a transaction from the builder.
- @return A PiwikTranaction instance
+ Build a transaction from the builder.
+ @return a new transaction
  */
 - (PiwikTransaction*)build;
 

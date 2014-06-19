@@ -7,40 +7,36 @@
 //
 
 #import "PiwikTransaction.h"
+#import "PiwikTransactionBuilder.h"
+
 
 @implementation PiwikTransaction
 
 
-+ (instancetype)transactionWithIdentifier:(NSString*)identifier
-                                    total:(NSUInteger)total
-                                      tax:(NSUInteger)tax
-                                 shipping:(NSUInteger)shipping
-                                 discount:(NSUInteger)discount
-                                    items:(NSArray*)items {
-
-  return [[PiwikTransaction alloc] initWithIdentifier:identifier total:total tax:tax shipping:shipping discount:discount items:items];
++ (instancetype)transactionWithBuilder:(TransactionBuilderBlock)block {
+  NSParameterAssert(block);
   
+  PiwikTransactionBuilder *builder = [[PiwikTransactionBuilder alloc] init];
+  block(builder);
+  
+  return [builder build];
 }
 
 
-- (id)initWithIdentifier:(NSString*)identifier
-                   total:(NSUInteger)total
-                     tax:(NSUInteger)tax
-                shipping:(NSUInteger)shipping
-                discount:(NSUInteger)discount
-                   items:(NSArray*)items {
+- (id)initWithBuilder:(PiwikTransactionBuilder*)builder {
   
   self = [super init];
   if (self) {
-    _identifier = identifier;
-    _total = total;
-    _tax = tax;
-    _shipping = shipping;
-    _discount = discount;
-    _items = items;
+    _identifier = builder.identifier;
+    _grandTotal = builder.grandTotal;
+    _subTotal = builder.subTotal;
+    _tax = builder.tax;
+    _shippingCost = builder.shippingCost;
+    _discount = builder.discount;
+    _items = builder.items;
   }
   return self;
-  
 }
+
 
 @end
