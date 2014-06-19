@@ -307,20 +307,21 @@ static PiwikTracker *_sharedInstance;
   __weak typeof(self)weakSelf = self;
   dispatch_async(dispatch_get_main_queue(), ^{
     
-    [weakSelf stopDispatchTimer];
+    typeof(self) strongSelf = weakSelf;
+    [strongSelf stopDispatchTimer];
     
     // If dispatch interval is < 0, manual dispatch must be used
     // If dispatch internal is = 0, the event is dispatched automatically directly after the event is tracked
-    if (weakSelf.dispatchInterval > 0) {
+    if (strongSelf.dispatchInterval > 0) {
       
       // Run on timer
-      weakSelf.dispatchTimer = [NSTimer scheduledTimerWithTimeInterval:weakSelf.dispatchInterval
-                                                                target:weakSelf
+      strongSelf.dispatchTimer = [NSTimer scheduledTimerWithTimeInterval:strongSelf.dispatchInterval
+                                                                target:strongSelf
                                                               selector:@selector(dispatch:)
                                                               userInfo:nil
                                                                repeats:NO];
       
-      NSLog(@"Dispatch timer started with interval %f", weakSelf.dispatchInterval);
+      NSLog(@"Dispatch timer started with interval %f", strongSelf.dispatchInterval);
       
     }
     
@@ -684,7 +685,8 @@ static PiwikTracker *_sharedInstance;
       // Trigger dispatch
       __weak typeof(self)weakSelf = self;
       dispatch_async(dispatch_get_main_queue(), ^{
-        [weakSelf dispatch];
+        typeof(self) strongSelf = weakSelf;
+        [strongSelf dispatch];
       });
     }
     
@@ -981,8 +983,8 @@ static NSOperationQueue* requestQueue = nil;
       // As of Piwik 2.0 the query string should not be url encoded in the request body
       // Unfortenatly the AFNetworking methods for create parameter pairs are not external
       NSMutableArray *parameterPair = [NSMutableArray arrayWithCapacity:params.count];
-      [params enumerateKeysAndObjectsUsingBlock:^(id key, id obj, BOOL *stop) {
-        [parameterPair addObject:[NSString stringWithFormat:@"%@=%@", key, obj]];
+      [params enumerateKeysAndObjectsUsingBlock:^(id key, id paramsObj, BOOL *paramsStop) {
+        [parameterPair addObject:[NSString stringWithFormat:@"%@=%@", key, paramsObj]];
       }];
       
       NSString *queryString = [NSString stringWithFormat:@"?%@", [parameterPair componentsJoinedByString:@"&"]];
