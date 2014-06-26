@@ -677,7 +677,7 @@ static PiwikTracker *_sharedInstance;
   // Add common parameters
   parameters = [self addStaticParameters:parameters];
   
-  NSLog(@"Store event with parameters %@", parameters);
+//  NSLog(@"Store event with parameters %@", parameters);
   
   [self storeEventWithParameters:parameters completionBlock:^{
     
@@ -904,9 +904,9 @@ static NSOperationQueue* requestQueue = nil;
         
         NSURLRequest *request = [self requestForEvents:events];
         
-        NSLog(@"Request %@", request);
-        NSLog(@"Request headers %@", [request allHTTPHeaderFields]);
-        NSLog(@"Request body %@", [[NSString alloc] initWithData:request.HTTPBody encoding:NSUTF8StringEncoding]);
+//        NSLog(@"Request %@", request);
+//        NSLog(@"Request headers %@", [request allHTTPHeaderFields]);
+//        NSLog(@"Request body %@", [[NSString alloc] initWithData:request.HTTPBody encoding:NSUTF8StringEncoding]);
 
 //        NSLocale *locale = [NSLocale currentLocale];
 //        DLog(@"Language %@", [locale objectForKey:NSLocaleLanguageCode]);
@@ -916,7 +916,7 @@ static NSOperationQueue* requestQueue = nil;
               
               if ( !connectionError )
               {
-                  NSLog(@"Successfully sent stats to Piwik server");
+//                  NSLog(@"Successfully sent stats to Piwik server");
                   
                   [self deleteEventsWithIDs:entityIDs];
                   
