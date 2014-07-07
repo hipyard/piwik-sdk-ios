@@ -321,7 +321,7 @@ static PiwikTracker *_sharedInstance;
                                                               userInfo:nil
                                                                repeats:NO];
       
-      NSLog(@"Dispatch timer started with interval %f", strongSelf.dispatchInterval);
+//      NSLog(@"Dispatch timer started with interval %f", strongSelf.dispatchInterval);
       
     }
     
@@ -336,7 +336,7 @@ static PiwikTracker *_sharedInstance;
     [self.dispatchTimer invalidate];
     self.dispatchTimer = nil;
     
-    NSLog(@"Dispatch timer stopped");
+//    NSLog(@"Dispatch timer stopped");
   }
   
 }
